@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, BookOpen, ArrowRight, Calendar, User } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { blogService, settingsService } from "@/lib/services";
 
 export default function BlogPage() {
@@ -87,7 +88,7 @@ export default function BlogPage() {
             >
               <div className="relative aspect-[16/10] rounded-[3rem] overflow-hidden border border-white/5 group-hover:border-brand-primary/50 transition-all mb-8">
                 {article.image ? (
-                  <img src={article.image} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                  <Image src={article.image} alt={article.title} fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
                 ) : (
                   <div className="w-full h-full bg-white/5 flex items-center justify-center text-brand-primary">
                     <BookOpen size={64} />

@@ -6,6 +6,7 @@ import { Plus, Trash2, Edit2, Search, ExternalLink, Save, X, Play, Info, Video, 
 import { FaYoutube } from "react-icons/fa6";
 import { youtubeService } from "@/lib/services";
 import { uploadToCloudinary } from "@/lib/cloudinary";
+import Image from "next/image";
 
 export default function AdminYoutubeHub() {
   const [videos, setVideos] = useState<any[]>([]);
@@ -120,7 +121,7 @@ export default function AdminYoutubeHub() {
                  <label className="text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">Thumbnail Preview</label>
                  <div className="relative group aspect-video rounded-3xl overflow-hidden bg-white/5 border-2 border-dashed border-white/10 flex items-center justify-center hover:border-brand-primary transition-all">
                     {formData.thumbnail ? (
-                      <img src={formData.thumbnail} alt="Preview" className="w-full h-full object-cover" />
+                      <Image src={formData.thumbnail} alt="Preview" fill className="object-cover" />
                     ) : (
                       <div className="text-center p-6">
                         {isUploading ? (
@@ -202,7 +203,7 @@ export default function AdminYoutubeHub() {
                     <div className="flex items-center gap-6">
                       <div className="w-24 h-16 rounded-xl bg-white/5 overflow-hidden border border-white/10 flex items-center justify-center text-brand-primary">
                         {video.thumbnail ? (
-                          <img src={video.thumbnail} alt="thumb" className="w-full h-full object-cover" />
+                          <Image src={video.thumbnail} alt="thumb" fill className="object-cover" />
                         ) : (
                           <FaYoutube size={24} />
                         )}

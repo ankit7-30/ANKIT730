@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -12,11 +12,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
   const [brand, setBrand] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadContent();
-  }, [params.slug]);
-
-  const loadContent = async () => {
+  const loadContent = useCallback(async () => {
     try {
       const [blogData, brandData] = await Promise.all([
         blogService.getById(params.slug),
@@ -29,7 +25,11 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [params.slug]);
+
+  useEffect(() => {
+    loadContent();
+  }, [loadContent]);
 
   if (loading) {
     return (
@@ -80,7 +80,9 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full overflow-hidden border border-brand-primary/20 bg-white/5 flex items-center justify-center">
                 {brand?.ytAvatar ? (
-                  <img src={brand.ytAvatar} alt="Ankit" className="w-full h-full object-cover" />
+                  <div className="relative w-full h-full">
+                    <Image src={brand.ytAvatar} alt="Ankit" fill className="object-cover" />
+                  </div>
                 ) : (
                   <User size={24} className="text-gray-500" />
                 )}
@@ -105,11 +107,9 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
           className="relative aspect-video rounded-[3rem] overflow-hidden border border-white/5 mb-16 shadow-2xl bg-white/5"
         >
           {post.image ? (
-            <img
-              src={post.image}
-              alt={post.title}
-              className="w-full h-full object-cover"
-            />
+            <div className="relative w-full h-full">
+              <Image src={post.image} alt={post.title} fill className="object-cover" />
+            </div>
           ) : (
             <div className="w-full h-full flex items-center justify-center text-white/10">
                <Image src="/favicon.png" alt="Logo" width={100} height={100} className="opacity-20 grayscale" />
