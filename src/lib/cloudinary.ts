@@ -1,15 +1,19 @@
-export const uploadToCloudinary = async (file: File) => {
+export const uploadToCloudinary = async (file: File, folder: string = "ankit_general") => {
   const formData = new FormData();
   formData.append("file", file);
-  formData.append("upload_preset", "ml_default"); // You might need to create this in Cloudinary dashboard
-
-  // Note: For signed uploads, you'd fetch the signature from /api/upload first.
-  // For simplicity initially, you can use unsigned uploads if configured in Cloudinary.
-  // This utility follows the unsigned pattern but is ready to be upgraded to signed.
+  
+  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "ml_default";
+  formData.append("upload_preset", uploadPreset); 
+  formData.append("folder", folder); // This will automatically create and organize folders
 
   try {
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    if (!cloudName) {
+      throw new Error("Cloudinary Cloud Name is missing in .env.local");
+    }
+
     const response = await fetch(
-      `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
       {
         method: "POST",
         body: formData,
@@ -17,13 +21,15 @@ export const uploadToCloudinary = async (file: File) => {
     );
 
     const data = await response.json();
-    if (data.secure_url) {
+    
+    if (response.ok && data.secure_url) {
       return data.secure_url;
     } else {
-      throw new Error(data.error?.message || "Upload failed");
+      console.error("Cloudinary Response Error:", data);
+      throw new Error(data.error?.message || "Upload failed. Check if your Upload Preset is set to 'Unsigned' in Cloudinary.");
     }
-  } catch (error) {
-    console.error("Cloudinary Upload Error:", error);
-    throw error;
+  } catch (error: any) {
+    console.error("Cloudinary Connection Error:", error);
+    throw new Error(error.message || "Network error during upload.");
   }
 };

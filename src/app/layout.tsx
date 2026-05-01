@@ -8,8 +8,13 @@ const font = Outfit({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Ankit Yadav | Official Brand Website",
-  description: "Identity hub for Ankit Yadav - Student, Creator, and Entrepreneur. Explore Growth Matrix content, articles, and resources.",
+  description: "Identity hub for Ankit Yadav - Student, Creator, and Entrepreneur. Explore Ankit Yadav's exclusive content, articles, and resources.",
+
+  icons: {
+    icon: "/favicon.png",
+  },
 };
+
 
 export default function RootLayout({
   children,

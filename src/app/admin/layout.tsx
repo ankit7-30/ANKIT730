@@ -43,7 +43,18 @@ export default function AdminLayout({
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    
+    // SENIOR SECURITY: Real-time Auth Listener
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user && user.email === "ankitkumaryadav26548@gmail.com") {
+        setIsAdmin(true);
+      } else {
+        setIsAdmin(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [setIsAdmin]);
 
   const handleSignOut = async () => {
     try {
@@ -63,7 +74,7 @@ export default function AdminLayout({
   if (pathname === "/admin") return <>{children}</>;
 
 
-  // Basic auth check (will be more robust with Firebase)
+  // REAL IDENTITY CHECK: Blocks even if state is manually flipped
   if (!isAdmin) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-6">

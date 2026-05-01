@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
-import { Menu, X, BookOpen, Download, LayoutDashboard, Home as HomeIcon } from "lucide-react";
-import { FaYoutube, FaInstagram } from "react-icons/fa6";
+import { Menu, X, BookOpen, Download, Home as HomeIcon } from "lucide-react";
+import { FaYoutube } from "react-icons/fa6";
 
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -39,7 +39,7 @@ export default function Navbar() {
     <nav
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-6 py-4",
-        scrolled ? "glass-dark py-3" : "bg-transparent"
+        scrolled ? "glass-dark py-3 border-b border-white/5 shadow-2xl" : "bg-transparent"
       )}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -47,7 +47,7 @@ export default function Navbar() {
           <div className="w-12 h-12 bg-brand-primary rounded-xl flex items-center justify-center font-bold text-lg transition-transform group-hover:scale-110 text-black shadow-[0_0_20px_rgba(245,158,11,0.3)]">
             AY
           </div>
-          <span className="font-bold text-xl tracking-tighter">Ankit Yadav</span>
+          <span className="font-bold text-xl tracking-tighter text-white">Ankit Yadav</span>
         </Link>
 
         {/* Desktop Nav */}
@@ -76,7 +76,7 @@ export default function Navbar() {
 
         {/* Mobile Toggle */}
         <button
-          className="md:hidden p-2 hover:bg-white/10 rounded-lg transition-colors"
+          className="md:hidden p-2 hover:bg-white/10 rounded-lg transition-colors text-white"
           onClick={() => setIsOpen(!isOpen)}
         >
           {isOpen ? <X size={24} /> : <Menu size={24} />}
@@ -92,7 +92,7 @@ export default function Navbar() {
             exit={{ opacity: 0, y: -20 }}
             className="absolute top-full left-0 right-0 glass-dark border-t border-white/10 p-6 md:hidden"
           >
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 text-white">
               {navLinks.map((link) => (
                 <Link
                   key={link.name}

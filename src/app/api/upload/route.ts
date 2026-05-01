@@ -9,9 +9,14 @@ cloudinary.config({
 
 export async function POST(request: Request) {
   try {
-    // In a production environment, you would verify the Firebase Auth token here
-    // using firebase-admin to ensure only the Admin can upload.
-    // For now, we ensure the request is coming from our own server context.
+    const hostname = request.headers.get('host') || '';
+    const adminDomain = process.env.ADMIN_DOMAIN || 'z9k-v3-management.com';
+    const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1');
+
+    // SECURITY GUARD: Only allow uploads from the Admin Domain or Localhost
+    if (!isLocalhost && !hostname.includes(adminDomain)) {
+      return NextResponse.json({ error: "Unauthorized: Domain Restricted" }, { status: 403 });
+    }
     
     const timestamp = Math.round(new Date().getTime() / 1000);
     const signature = cloudinary.utils.api_sign_request(

@@ -1,9 +1,20 @@
 "use client";
 
+import { useState, useEffect } from "react";
+
 import { motion } from "framer-motion";
 import { ShieldCheck, Eye, Lock, Globe } from "lucide-react";
+import { settingsService } from "@/lib/services";
+
 
 export default function PrivacyPage() {
+  const [brand, setBrand] = useState<any>(null);
+
+  useEffect(() => {
+    settingsService.get().then(setBrand);
+  }, []);
+
+
   return (
     <div className="max-w-4xl mx-auto px-6 py-20">
       <motion.div 
@@ -18,8 +29,7 @@ export default function PrivacyPage() {
           <h1 className="text-4xl md:text-6xl font-bold tracking-tighter">Privacy Policy</h1>
         </div>
         <p className="text-xl text-gray-400 leading-relaxed">
-          Your privacy matters. I&apos;m committed to being transparent about how I handle 
-          any data collected on this platform.
+          {brand?.privacyIntro || "Your privacy matters. I'm committed to being transparent about how I handle any data collected on this platform."}
         </p>
       </motion.div>
 
@@ -29,15 +39,11 @@ export default function PrivacyPage() {
             <Eye size={20} className="text-brand-primary" />
             What I Collect
           </h2>
-          <p className="text-gray-400 leading-relaxed mb-4">
-            I only collect basic, non-identifiable information through Google Analytics 
-            (like which pages you visit and what country you are from) to help me 
-            understand what content is most helpful to you.
-          </p>
-          <p className="text-gray-400 leading-relaxed">
-            If you sign up for my newsletter, I only store your email address. I will 
-            never sell or share your email with third parties.
-          </p>
+          <div className="text-gray-400 leading-relaxed whitespace-pre-line">
+            {brand?.privacyCollect || `I only collect basic, non-identifiable information through Google Analytics (like which pages you visit and what country you are from) to help me understand what content is most helpful to you.
+
+If you sign up for my newsletter, I only store your email address. I will never sell or share your email with third parties.`}
+          </div>
         </section>
 
         <section>
@@ -46,8 +52,7 @@ export default function PrivacyPage() {
             Data Security
           </h2>
           <p className="text-gray-400 leading-relaxed">
-            I use industry-standard security measures (like SSL encryption) to protect 
-            the data on this site. Your safety is my priority.
+            {brand?.privacySecurity || "I use industry-standard security measures (like SSL encryption) to protect the data on this site. Your safety is my priority."}
           </p>
         </section>
 
@@ -57,19 +62,17 @@ export default function PrivacyPage() {
             Cookies
           </h2>
           <p className="text-gray-400 leading-relaxed">
-            This site uses basic cookies to improve your browsing experience and for 
-            analytics. You can choose to disable cookies in your browser settings if 
-            you prefer.
+            {brand?.privacyCookies || "This site uses basic cookies to improve your browsing experience and for analytics. You can choose to disable cookies in your browser settings if you prefer."}
           </p>
         </section>
 
         <section className="pt-8 border-t border-white/5">
           <p className="text-sm text-gray-500">
-            Last Updated: May 01, 2026. If you have any questions, feel free to reach 
-            out on Instagram.
+            Last Updated: May 01, 2026. If you have any questions, feel free to reach out on Instagram.
           </p>
         </section>
       </div>
     </div>
   );
 }
+

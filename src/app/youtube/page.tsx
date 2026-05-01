@@ -1,157 +1,205 @@
 "use client";
 
-import Image from "next/image";
-import { motion } from "framer-motion";
-import { ExternalLink, Play, Search, Filter } from "lucide-react";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Play, Search, Video, Zap, Radio, ListVideo } from "lucide-react";
 import { FaYoutube } from "react-icons/fa6";
-
-
-// Mock data as if from Firestore
-const videos = [
-  {
-    id: "1",
-    title: "How to build a personal brand in 2026",
-    thumbnail: "/images/yt_sample.png",
-    link: "https://youtube.com/watch?v=example1",
-    category: "Personal Brand",
-    views: "15K",
-    date: "2 days ago"
-  },
-  {
-    id: "2",
-    title: "10 Tech trends every student should know",
-    thumbnail: "/images/yt_sample.png",
-    link: "https://youtube.com/watch?v=example2",
-    category: "Technology",
-    views: "8.2K",
-    date: "1 week ago"
-  },
-  {
-    id: "3",
-    title: "My daily routine as a creator and student",
-    thumbnail: "/images/yt_sample.png",
-    link: "https://youtube.com/watch?v=example3",
-    category: "Mindset",
-    views: "12K",
-    date: "2 weeks ago"
-  },
-  {
-    id: "4",
-    title: "Why Growth Matrix is the future of learning",
-    thumbnail: "/images/yt_sample.png",
-    link: "https://youtube.com/watch?v=example4",
-    category: "Education",
-    views: "25K",
-    date: "1 month ago"
-  }
-];
-
-const categories = ["All", "Personal Brand", "Technology", "Mindset", "Education"];
+import { youtubeService, settingsService } from "@/lib/services";
 
 export default function YoutubePage() {
+  const [videos, setVideos] = useState<any[]>([]);
+  const [brand, setBrand] = useState<any>({
+    ytChannelName: "",
+    ytHandle: "",
+    ytAvatar: "",
+    ytLink: "#"
+  });
+
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [activeTab, setActiveTab] = useState("VIDEOS");
+  const [sortBy, setSortBy] = useState("Newest");
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [videoData, brandData] = await Promise.all([
+        youtubeService.getAll(),
+        settingsService.get()
+      ]);
+      setVideos(videoData);
+      if (brandData) setBrand(brandData);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const tabs = [
+    { id: "VIDEOS", label: "Videos", icon: Video },
+    { id: "SHORTS", label: "Shorts", icon: Zap },
+    { id: "LIVE", label: "Live", icon: Radio },
+    { id: "PLAYLIST", label: "Playlists", icon: ListVideo },
+  ];
+
+  const getFilteredAndSortedVideos = () => {
+    let filtered = videos.filter(v => 
+      (v.category === activeTab) && 
+      v.title?.toLowerCase().includes(search.toLowerCase())
+    );
+    if (sortBy === "Newest") {
+      return [...filtered].sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+    } else {
+      return [...filtered].sort((a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0));
+    }
+  };
+
+  const displayVideos = getFilteredAndSortedVideos();
+
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12">
-      <header className="mb-16">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-12 h-12 bg-red-600 rounded-2xl flex items-center justify-center shadow-[0_0_15px_rgba(220,38,38,0.4)]">
-            <FaYoutube size={28} className="text-white" />
-          </div>
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tighter">Growth Matrix</h1>
-        </div>
-
-        <p className="text-xl text-gray-400 max-w-2xl leading-relaxed">
-          Deep dives into mindset, money, and machinery. Explore my full library of 
-          educational content curated for the ambitious.
-        </p>
-      </header>
-
-      {/* Filters & Search */}
-      <div className="flex flex-col md:flex-row gap-6 mb-12 justify-between items-start md:items-center">
-        <div className="flex flex-wrap gap-2">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              className="px-6 py-2 rounded-full text-sm font-medium border border-white/10 hover:border-brand-primary hover:text-brand-primary transition-all bg-white/5"
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
+    <main className="min-h-screen pt-32 pb-20 px-6 bg-black text-white">
+      <div className="max-w-7xl mx-auto space-y-12">
         
-        <div className="relative w-full md:w-80">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
-          <input 
-            type="text" 
-            placeholder="Search videos..."
-            className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 focus:border-brand-primary outline-none transition-colors"
-          />
-        </div>
-      </div>
+        {/* Channel Branding */}
+        <div className="flex flex-col md:flex-row items-center gap-8 mb-16">
+          <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-white/5 bg-white/5 shrink-0 shadow-2xl relative group">
+            {brand.ytAvatar ? (
+              <img src={brand.ytAvatar} alt="Channel" className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-brand-primary bg-brand-primary/10">
+                <FaYoutube size={64} />
+              </div>
+            )}
+          </div>
+          <div className="text-center md:text-left flex-1 space-y-4">
+            <div className="space-y-1">
+              {loading ? (
+                <>
+                  <div className="h-10 w-64 bg-white/5 rounded-xl animate-pulse mb-2" />
+                  <div className="h-6 w-32 bg-white/5 rounded-lg animate-pulse" />
+                </>
+              ) : (
+                <>
+                  <h1 className="text-4xl md:text-5xl font-bold tracking-tighter">{brand.ytChannelName}</h1>
+                  <p className="text-gray-500 font-bold text-lg">{brand.ytHandle}</p>
+                </>
+              )}
+            </div>
 
-      {/* Video Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {videos.map((video, index) => (
-          <motion.a
-            key={video.id}
-            href={video.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="group block"
-          >
-            <div className="relative aspect-video rounded-2xl overflow-hidden border border-white/5 shadow-xl mb-4">
-              <Image
-                src={video.thumbnail}
-                alt={video.title}
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <div className="w-14 h-14 bg-brand-primary rounded-full flex items-center justify-center text-white shadow-xl scale-90 group-hover:scale-100 transition-transform">
-                  <Play fill="currentColor" size={24} />
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+              <a 
+                href={brand.ytLink} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="bg-[#f00] hover:bg-[#c00] text-white px-10 py-4 rounded-full font-bold transition-all shadow-xl shadow-red-600/20 active:scale-95"
+              >
+                Subscribe
+              </a>
+            </div>
+
+          </div>
+        </div>
+
+        {/* Navigation Tabs */}
+        <div className="border-b border-white/10">
+          <div className="flex items-center gap-8 overflow-x-auto no-scrollbar">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`pb-4 px-2 text-sm font-bold tracking-tight transition-all relative whitespace-nowrap ${activeTab === tab.id ? "text-white" : "text-gray-500 hover:text-white"}`}
+              >
+                {tab.label}
+                {activeTab === tab.id && (
+                  <motion.div layoutId="ytActiveTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-white" />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Content Controls */}
+        <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
+          <div className="flex items-center gap-3">
+            {["Newest", "Oldest"].map((sort) => (
+              <button
+                key={sort}
+                onClick={() => setSortBy(sort)}
+                className={`px-6 py-2 rounded-xl text-[10px] uppercase tracking-widest font-bold transition-all ${sortBy === sort ? "bg-white text-black" : "bg-white/5 text-gray-400 hover:bg-white/10"}`}
+              >
+                {sort}
+              </button>
+            ))}
+          </div>
+          <div className="relative w-full md:w-80">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+            <input 
+              type="text" placeholder="Search your favorite content..." value={search} onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-6 outline-none focus:border-brand-primary text-sm transition-all"
+            />
+          </div>
+        </div>
+
+        {/* Dynamic Content Grid */}
+        <div className={`grid gap-x-6 gap-y-10 ${activeTab === "SHORTS" ? "grid-cols-2 md:grid-cols-4 lg:grid-cols-5" : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"}`}>
+          <AnimatePresence mode="popLayout">
+            {loading ? (
+              [1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className={`bg-white/5 rounded-3xl animate-pulse ${activeTab === "SHORTS" ? "aspect-[9/16]" : "aspect-video"}`} />
+              ))
+            ) : displayVideos.map((video, i) => (
+              <motion.div
+                layout key={video.id}
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                className="group cursor-pointer"
+              >
+                <div className={`relative rounded-[2rem] overflow-hidden bg-white/5 border border-white/5 group-hover:border-brand-primary/50 transition-all mb-4 ${activeTab === "SHORTS" ? "aspect-[9/16]" : "aspect-video"}`}>
+                  
+                  {/* Thumbnail Logic */}
+                  {video.thumbnail ? (
+                    <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-brand-primary/5 to-transparent flex items-center justify-center">
+                      <FaYoutube size={activeTab === "SHORTS" ? 48 : 64} className="text-white/10 group-hover:text-brand-primary/20 transition-all" />
+                    </div>
+                  )}
+
+                  {/* Play Overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all bg-black/40 backdrop-blur-[2px]">
+                    <a href={video.videoUrl} target="_blank" rel="noopener noreferrer" className="w-14 h-14 bg-brand-primary rounded-full flex items-center justify-center text-black shadow-2xl hover:scale-110 transition-transform">
+                      <Play size={24} fill="currentColor" className="ml-1" />
+                    </a>
+                  </div>
                 </div>
-              </div>
-              <div className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-[10px] font-bold text-white uppercase tracking-wider">
-                {video.category}
-              </div>
-            </div>
-            
-            <h3 className="text-xl font-bold leading-tight mb-2 group-hover:text-brand-primary transition-colors">
-              {video.title}
-            </h3>
-            
-            <div className="flex items-center gap-4 text-xs text-gray-500 font-medium">
-              <span>{video.views} views</span>
-              <span className="w-1 h-1 bg-gray-700 rounded-full" />
-              <span>{video.date}</span>
-              <ExternalLink size={12} className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-          </motion.a>
-        ))}
-      </div>
-
-      {/* Channel CTA */}
-      <section className="mt-24 p-8 md:p-16 rounded-[2.5rem] bg-gradient-to-br from-brand-secondary/50 to-brand-accent/50 border border-white/5 relative overflow-hidden text-center">
-        <div className="absolute -top-24 -left-24 w-64 h-64 bg-brand-primary/10 blur-[100px] rounded-full" />
-        <div className="relative z-10">
-          <h2 className="text-3xl md:text-5xl font-bold mb-6">Never miss a deep dive.</h2>
-          <p className="text-gray-400 mb-10 max-w-xl mx-auto">
-            Subscribe to Growth Matrix on YouTube for weekly insights into the world 
-            of high-growth personal branding and tech.
-          </p>
-          <a 
-            href="https://youtube.com/@GrowthMatrix" 
-            target="_blank" 
-            className="inline-flex items-center gap-3 px-10 py-4 bg-red-600 rounded-2xl font-bold hover:bg-red-700 transition-all shadow-[0_0_25px_rgba(220,38,38,0.3)]"
-          >
-            <FaYoutube size={24} />
-            Subscribe Now
-          </a>
-
+                <div className="px-2 space-y-1">
+                  <h3 className={`font-bold line-clamp-2 group-hover:text-brand-primary transition-colors ${activeTab === "SHORTS" ? "text-sm" : "text-lg leading-snug"}`}>{video.title}</h3>
+                  <p className="text-[10px] text-gray-600 font-bold uppercase tracking-widest flex items-center gap-2">
+                    <span className="w-1 h-1 rounded-full bg-brand-primary" />
+                    {video.createdAt?.seconds ? new Date(video.createdAt.seconds * 1000).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : "Just now"}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
-      </section>
-    </div>
+
+        {!loading && displayVideos.length === 0 && (
+          <div className="py-40 text-center text-gray-500">
+             <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
+                <FaYoutube size={40} className="text-gray-800" />
+             </div>
+             <p className="text-xl font-bold text-white">Section is currently empty.</p>
+             <p className="text-sm mt-1">Visit your admin panel to add some fresh content!</p>
+          </div>
+        )}
+
+      </div>
+    </main>
   );
 }

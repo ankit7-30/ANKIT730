@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Save, 
@@ -18,11 +19,14 @@ import {
 } from "lucide-react";
 
 import { FaYoutube, FaInstagram, FaTwitter, FaLinkedin } from "react-icons/fa6";
+import { settingsService, MASTER_SETTINGS_ID } from "@/lib/services";
+
 
 export default function AdminSettings() {
   const [activeTab, setActiveTab] = useState("profile");
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [dbId, setDbId] = useState("");
 
   const [profile, setProfile] = useState({
     name: "Ankit Yadav",
@@ -32,11 +36,30 @@ export default function AdminSettings() {
   });
 
   const [links, setLinks] = useState({
-    youtube: "https://youtube.com/@GrowthMatrix",
-    instagram: "https://instagram.com/Ankit7.30",
-    twitter: "https://twitter.com/ankit730",
-    linkedin: "https://linkedin.com/in/ankityadav"
+    youtube: "",
+    instagram: "",
+    twitter: "",
+    linkedin: ""
   });
+
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = async () => {
+    const data = await settingsService.get();
+    if (data) {
+      setDbId(data.id);
+      setLinks({
+        youtube: data.socialYoutube || "",
+        instagram: data.socialInstagram || "",
+        twitter: data.socialTwitter || "",
+        linkedin: data.socialLinkedin || ""
+      });
+      if (data.heroHeadline) setProfile(prev => ({ ...prev, name: data.heroHeadline }));
+      if (data.adminEmail) setProfile(prev => ({ ...prev, email: data.adminEmail }));
+    }
+  };
 
   const [security, setSecurity] = useState({
     twoFactor: true,
@@ -51,14 +74,30 @@ export default function AdminSettings() {
     securityAlerts: true
   });
 
-  const handleSave = () => {
-    setIsSaving(true);
-    setTimeout(() => {
-      setIsSaving(false);
+  const handleSave = async () => {
+    try {
+      setIsSaving(true);
+      const updateData = {
+        socialYoutube: links.youtube,
+        socialInstagram: links.instagram,
+        socialTwitter: links.twitter,
+        socialLinkedin: links.linkedin,
+        heroHeadline: profile.name, // Keep name in sync
+        adminEmail: profile.email // NEW: Persist email to cloud
+      };
+
+      await settingsService.update(MASTER_SETTINGS_ID, updateData);
+
+
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
-    }, 1500);
+    } catch (err) {
+      alert("Cloud save failed. Check your connection.");
+    } finally {
+      setIsSaving(false);
+    }
   };
+
 
   return (
     <div className="space-y-12 pb-24">

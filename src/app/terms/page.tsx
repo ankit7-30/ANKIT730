@@ -1,9 +1,19 @@
 "use client";
 
+import { useState, useEffect } from "react";
+
 import { motion } from "framer-motion";
 import { FileText, UserCheck, Copyright, AlertCircle } from "lucide-react";
+import { settingsService } from "@/lib/services";
 
 export default function TermsPage() {
+  const [brand, setBrand] = useState<any>(null);
+
+  useEffect(() => {
+    settingsService.get().then(setBrand);
+  }, []);
+
+
   return (
     <div className="max-w-4xl mx-auto px-6 py-20">
       <motion.div 
@@ -18,8 +28,7 @@ export default function TermsPage() {
           <h1 className="text-4xl md:text-6xl font-bold tracking-tighter">Terms of Service</h1>
         </div>
         <p className="text-xl text-gray-400 leading-relaxed">
-          Welcome to my digital home. By using this website, you agree to these 
-          simple and straightforward terms.
+          {brand?.termsIntro || "Welcome to my digital home. By using this website, you agree to these simple and straightforward terms."}
         </p>
       </motion.div>
 
@@ -29,14 +38,11 @@ export default function TermsPage() {
             <Copyright size={20} className="text-brand-primary" />
             Content Ownership
           </h2>
-          <p className="text-gray-400 leading-relaxed mb-4">
-            All content on this site—including videos, articles, and resources—is 
-            owned by Ankit Yadav unless otherwise stated. 
-          </p>
-          <p className="text-gray-400 leading-relaxed">
-            You are free to share links to my content, but please do not re-upload 
-            my videos or sell my free resources as your own.
-          </p>
+          <div className="text-gray-400 leading-relaxed mb-4 whitespace-pre-line">
+            {brand?.termsOwnership || `All content on this site—including videos, articles, and resources—is owned by Ankit Yadav unless otherwise stated. 
+
+You are free to share links to my content, but please do not re-upload my videos or sell my free resources as your own.`}
+          </div>
         </section>
 
         <section>
@@ -45,9 +51,7 @@ export default function TermsPage() {
             Resource Usage
           </h2>
           <p className="text-gray-400 leading-relaxed">
-            The resources provided here are for educational and personal use. While 
-            they are designed to help you grow, I cannot guarantee specific financial 
-            or business results. Your success depends on your own effort and execution!
+            {brand?.termsUsage || "The resources provided here are for educational and personal use. While they are designed to help you grow, I cannot guarantee specific financial or business results. Your success depends on your own effort and execution!"}
           </p>
         </section>
 
@@ -57,8 +61,7 @@ export default function TermsPage() {
             Disclaimer
           </h2>
           <p className="text-gray-400 leading-relaxed">
-            I strive to keep all information accurate, but things change fast in tech 
-            and business. Use the information here at your own discretion.
+            {brand?.termsDisclaimer || "I strive to keep all information accurate, but things change fast in tech and business. Use the information here at your own discretion."}
           </p>
         </section>
 
@@ -71,3 +74,4 @@ export default function TermsPage() {
     </div>
   );
 }
+
