@@ -1,0 +1,50 @@
+/* Design System Reset - Amber Minimal */
+@tailwind base;
+
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand-primary: #f59e0b;
+  --brand-secondary: #262626;
+  --brand-bg: #171717;
+  --brand-text: #e5e5e5;
+  --glass-bg: rgba(38, 38, 38, 0.7);
+  --glass-border: rgba(245, 158, 11, 0.1);
+}
+
+body {
+  color: var(--brand-text);
+  background: var(--brand-bg);
+  min-height: 100vh;
+}
+
+::selection {
+  background: var(--brand-primary);
+  color: white;
+}
+
+
+@layer base {
+  body {
+    @apply antialiased;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+  }
+  .glass-dark {
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+}
+
