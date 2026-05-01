@@ -47,7 +47,7 @@ export default function AdminSettings() {
   }, []);
 
   const loadSettings = async () => {
-    const data = await settingsService.get();
+    const data = await settingsService.get() as any;
     if (data) {
       setDbId(data.id);
       setLinks({

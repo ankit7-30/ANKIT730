@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { Play, Search, Video, Zap, Radio, ListVideo } from "lucide-react";
 import { FaYoutube } from "react-icons/fa6";
 import { youtubeService, settingsService } from "@/lib/services";
@@ -69,7 +70,12 @@ export default function YoutubePage() {
         <div className="flex flex-col md:flex-row items-center gap-8 mb-16">
           <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-white/5 bg-white/5 shrink-0 shadow-2xl relative group">
             {brand.ytAvatar ? (
-              <img src={brand.ytAvatar} alt="Channel" className="w-full h-full object-cover" />
+              <Image 
+                src={brand.ytAvatar} 
+                alt="Channel" 
+                fill 
+                className="object-cover"
+              />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-brand-primary bg-brand-primary/10">
                 <FaYoutube size={64} />
@@ -163,7 +169,12 @@ export default function YoutubePage() {
                   
                   {/* Thumbnail Logic */}
                   {video.thumbnail ? (
-                    <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                    <Image 
+                      src={video.thumbnail} 
+                      alt={video.title} 
+                      fill 
+                      className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
                   ) : (
                     <div className="absolute inset-0 bg-gradient-to-br from-brand-primary/5 to-transparent flex items-center justify-center">
                       <FaYoutube size={activeTab === "SHORTS" ? 48 : 64} className="text-white/10 group-hover:text-brand-primary/20 transition-all" />
