@@ -40,6 +40,7 @@ export default function AdminLayout({
   const pathname = usePathname();
   const { isAdmin, setIsAdmin } = useStore();
   const [mounted, setMounted] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setMounted(true);
@@ -51,6 +52,7 @@ export default function AdminLayout({
       } else {
         setIsAdmin(false);
       }
+      setLoading(false);
     });
 
     return () => unsubscribe();
@@ -66,13 +68,23 @@ export default function AdminLayout({
     }
   };
 
-  // Prevent hydration mismatch by not rendering until client-side is ready
+  // Prevent hydration mismatch
   if (!mounted) return null;
-
 
   // If it's the login page, just show children
   if (pathname === "/admin") return <>{children}</>;
 
+  // SENIOR SECURITY: Block visibility while checking identity
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-6">
+        <div className="w-16 h-16 bg-brand-primary rounded-2xl flex items-center justify-center animate-pulse shadow-[0_0_50px_rgba(245,158,11,0.3)]">
+          <div className="w-8 h-8 border-4 border-black/30 border-t-black rounded-full animate-spin" />
+        </div>
+        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-primary animate-pulse">Verifying Identity...</p>
+      </div>
+    );
+  }
 
   // REAL IDENTITY CHECK: Blocks even if state is manually flipped
   if (!isAdmin) {
